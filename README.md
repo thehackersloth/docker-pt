@@ -437,7 +437,11 @@ This project is in active development and **needs contributors**. Whether you're
 | **Bug Fixes** | Check the Issues tab |
 | **UI/UX** | Mobile responsiveness, accessibility, better workflows |
 
-### How to Contribute
+### How to Get Involved
+
+**→ [Comment on Issue #1](https://github.com/thehackersloth/docker-pt/issues/1) to introduce yourself and request collaborator access.**
+
+Or just dive in:
 
 1. Fork the repo
 2. Create a feature branch (`git checkout -b feature/your-feature`)
