@@ -278,6 +278,32 @@ Full BloodHound support with an interactive web-based graph viewer:
 
 ---
 
+## First Login & Password Setup
+
+On first boot, the platform generates a random admin password. There are three ways to get it:
+
+### 1. Login Page Banner (Recommended)
+Open the web UI at `http://localhost`. A blue info banner appears below the login form showing your generated username and password. Click **"Got it"** to dismiss it permanently.
+
+### 2. Docker Logs
+```bash
+docker logs pentest 2>&1 | grep "ADMIN CREDENTIALS"
+```
+
+### 3. Set Your Own Password
+Pass `ADMIN_PASSWORD` as an environment variable at startup:
+```bash
+docker run -d --name pentest \
+  --network host --privileged \
+  -e ADMIN_PASSWORD=YourSecurePassword \
+  -v pentest-data:/data \
+  pentest-platform
+```
+
+> **Important:** Change the default password after first login via the Settings page. The first-boot banner only appears once — after you dismiss it or change the password, it's gone.
+
+---
+
 ## Security Hardening
 
 This platform has been hardened for real-world use:
@@ -386,7 +412,9 @@ docker-pt/
 
 ## Screenshots
 
-*Coming soon — contributions welcome!*
+![Dashboard](docs/dashboard.png)
+
+*The main dashboard showing scan activity, vulnerability breakdown, risk scores, and recent findings.*
 
 ---
 
