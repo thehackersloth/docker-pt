@@ -1,0 +1,140 @@
+# Professional Pentesting Platform - Main Container
+# Base: Kali Linux with all professional pentesting tools
+
+FROM kalilinux/kali-rolling:latest
+
+LABEL maintainer="Pentest Platform Team"
+LABEL description="Professional Pentesting Platform - Kali Linux with all tools"
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+# Update and install base tools
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    vim \
+    nano \
+    unzip \
+    python3 \
+    python3-pip \
+    python3-venv \
+    nodejs \
+    npm \
+    golang-go \
+    rust-all \
+    build-essential \
+    # Report generation dependencies
+    wkhtmltopdf \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Kali Linux tools (full installation)
+RUN apt-get update && apt-get install -y \
+    kali-linux-large \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install additional professional tools
+RUN apt-get update && apt-get install -y \
+    # Network tools
+    nmap \
+    masscan \
+    rustscan \
+    sshpass \
+    # Web tools
+    nikto \
+    sqlmap \
+    wpscan \
+    wfuzz \
+    ffuf \
+    gobuster \
+    # AD tools
+    crackmapexec \
+    responder \
+    # Password tools
+    hydra \
+    john \
+    hashcat \
+    medusa \
+    # Recon tools
+    theharvester \
+    recon-ng \
+    amass \
+    subfinder \
+    dnsrecon \
+    # SSL/TLS
+    sslscan \
+    testssl.sh \
+    sslyze \
+    # Wireless
+    aircrack-ng \
+    wifite \
+    # Cloud
+    cloudbrute \
+    # Additional
+    arjun \
+    paramspider \
+    waybackurls \
+    gau \
+    hakrawler \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python tools
+RUN pip3 install --no-cache-dir \
+    impacket \
+    bloodhound \
+    crackmapexec \
+    pymetasploit3 \
+    weasyprint \
+    jinja2 \
+    && rm -rf /root/.cache/pip
+
+# Install Go tools and add to PATH
+ENV GOPATH=/root/go
+ENV PATH=$PATH:/root/go/bin
+RUN go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest && \
+    go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && \
+    go install github.com/lc/gau/v2/cmd/gau@latest && \
+    go install github.com/hahwul/dalfox/v2@latest && \
+    go install github.com/projectdiscovery/httpx/cmd/httpx@latest && \
+    cp /root/go/bin/* /usr/local/bin/ && \
+    nuclei -update-templates
+
+# Install Metasploit Framework
+RUN curl https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb | bash
+
+# Install Neo4j (for BloodHound)
+RUN wget -O - https://debian.neo4j.com/neotechnology.gpg.key | apt-key add - && \
+    echo 'deb https://debian.neo4j.com stable 4.4' | tee -a /etc/apt/sources.list.d/neo4j.list && \
+    apt-get update && apt-get install -y neo4j && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create directories
+RUN mkdir -p /opt/pentest/{tools,scripts,results,logs,evidence} && \
+    mkdir -p /data/{scans,bloodhound,logs,evidence}
+
+# Copy custom tools and scripts
+COPY container/tools/ /opt/pentest/tools/
+COPY container/entrypoint.sh /entrypoint.sh
+
+# Set permissions
+RUN chmod +x /entrypoint.sh && \
+    chmod -R 755 /opt/pentest
+
+# Set working directory
+WORKDIR /opt/pentest
+
+# Expose ports (if needed)
+EXPOSE 8080 8081
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/bin/bash"]

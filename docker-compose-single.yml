@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  pentest-platform:
+    build:
+      context: .
+      dockerfile: container/Containerfile
+    container_name: pentest-all-in-one
+    privileged: true  # Required for network scanning
+    network_mode: "host"  # For network scanning capabilities
+    volumes:
+      - ./data:/data
+      - postgres_data:/var/lib/postgresql/18/main
+      - neo4j_data:/var/lib/neo4j/data
+      - redis_data:/var/lib/redis
+    # NOTE: ports are ignored with network_mode: "host"
+    # Services bind to: 80 (web), 8888 (API), 5433 (postgres internal)
+    environment:
+      # Database (port 5433 to avoid host postgres conflicts)
+      - POSTGRES_HOST=localhost
+      - POSTGRES_PORT=5433
+      - POSTGRES_DB=pentest
+      - POSTGRES_USER=pentest
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-}
+      # Neo4j
+      - NEO4J_HOST=localhost
+      - NEO4J_PORT=7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-}
+      # Redis
+      - REDIS_HOST=localhost
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      # Backend port
+      - BACKEND_PORT=8888
+      # AI
+      - OLLAMA_BASE_URL=http://localhost:11434
+      - AI_LOCAL_ONLY=false
+      # Admin password (generated randomly if not set)
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
+      # API keys (optional)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  postgres_data:
+  neo4j_data:
+  redis_data:

@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Environment & secrets
+.env
+*.env.local
+backend/.env
+
+# Build artifacts
+frontend/dist/
+frontend/build/
+*.egg-info/
+
+# Data & runtime
+data/
+*.db
+*.sqlite3
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.tar
+*.tar.gz
+
+# Claude
+.claude/
+
+# Dev status/progress files
+*STATUS*.md
+*PROGRESS*.md
+*COMPLETE*.md
+*MISSING*.md
+*SUMMARY*.md
+*CONFIRMED*.md
+BEAT_*.md
+BUILD_*.md
+FINAL_*.md
+IMPLEMENTATION_*.md
+README_*.md
+TEST_*.sh
+AUTOMATION_*.txt
+.playwright-mcp/
+package-lock.json
+
+# Dev docs (everything in README)
+*.md
+\!README.md
+.github/
+.dockerignore
+package.json
